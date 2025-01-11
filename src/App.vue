@@ -1,13 +1,17 @@
 <template>
   <div class="app">
     <h1>Сторінка з постами</h1>
-<!--    <my-input-->
-<!--    v-model="searchQuery"/>-->
-    <my-button
-        @click="showDialoge"
-        style="margin: 15px "
-    >Створити пост
-    </my-button>
+    <div class="app__btns">
+      <my-button
+          @click="showDialoge"
+      >Створити пост
+      </my-button>
+      <my-select
+          v-model="selectedSort"
+          :options="sortOptions"/>
+    </div>
+    <!--    <my-input-->
+    <!--    v-model="searchQuery"/>-->
     <my-dialog v-model:show="dialogVisible">
       <post-form
           @create="createPost"
@@ -26,10 +30,12 @@ import PostForm from "@/components/PostForm.vue";
 import PostList from "@/components/PostList.vue";
 import MyDialog from "@/components/UI/MyDialog.vue";
 import MyButton from "@/components/UI/MyButton.vue";
+import MySelect from "@/components/UI/MySelect.vue";
 import axios from "axios";
 
 export default {
   components: {
+    MySelect,
     MyButton,
     MyDialog,
     PostForm, PostList
@@ -39,11 +45,12 @@ export default {
       posts: [],
       dialogVisible: false,
       isPostsLoading: false,
-      // searchQuery: '',
-      // sortOptions: [
-      //   {value: 'title', name: 'По назві'},
-      //   {value: 'body', name: 'За змістом'},
-      // ]
+      selectedSort: '',
+      sortOptions: [
+        {value: 'title', name: 'По назві'},
+        {value: 'body', name: 'За змістом'},
+        {value: 'id', name: 'За ID'},
+      ]
     }
   },
   methods: {
@@ -61,8 +68,8 @@ export default {
     async fetchPost() {
       try {
         this.isPostsLoading = true;
-          const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10')
-          this.posts = response.data;
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10')
+        this.posts = response.data;
       } catch (e) {
         alert('Помилка')
       } finally {
@@ -73,9 +80,13 @@ export default {
   mounted() {
     this.fetchPost();
   },
-  // sortedPosts() {
-  //   return [...this.posts].sort((pos1,pos2 ) => pos1[this.selectedSort]?.localeCompare(pos2[this.selectedSort]));
-  // }
+  watch:{
+    selectedSort(newValue){
+      this.posts.sort((post1, post2) => {
+        return post1[newValue]?.localeCompare(post2[newValue]);
+      });
+    }
+  }
 }
 
 </script>
@@ -88,6 +99,12 @@ export default {
 
 .app {
   padding: 20px;
+}
+
+.app__btns {
+  margin: 15px 0;
+  display: flex;
+  justify-content: space-between;
 }
 
 .loader {
@@ -107,7 +124,7 @@ export default {
   background: var(--loader-color);
   top: 0;
   left: 0;
-  width: 0%;
+  width: 0;
   height: 100%;
   border-radius: 30px;
   animation: moving 1s ease-in-out infinite;;

@@ -40,6 +40,6 @@ export default {
 .postList-enter-from,
 .postList-leave-to {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(30px);
 }
 </style>
